@@ -5,7 +5,7 @@
  * @modify date 2019-01-12 22:46:31
  * @desc [bulrush Upload plugin]
  */
-package plugins
+package upload
 
 import (
 	"net/http"
