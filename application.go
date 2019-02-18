@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 
 	"github.com/2637309949/bulrush"
-	"github.com/2637309949/bulrush/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,8 +38,8 @@ func (upload *Upload) Plugin() bulrush.PNRet {
 			for _, files := range form.File {
 				for _, file := range files {
 					filename := filepath.Base(file.Filename)
-					uuid := utils.RandString(32)
-					uuidFileName := utils.RandString(32) + string(filename[len(filename)-len(filepath.Ext(filename)):])
+					uuid := bulrush.RandString(32)
+					uuidFileName := bulrush.RandString(32) + string(filename[len(filename)-len(filepath.Ext(filename)):])
 					if err := c.SaveUploadedFile(file, path.Join(upload.AssetPath, uuidFileName)); err != nil {
 						c.JSON(http.StatusInternalServerError, gin.H{
 							"message": err.Error(),
