@@ -21,9 +21,10 @@ type Upload struct {
 	bulrush.PNBase
 	AssetPath string
 	URLPrefix string
+	Save      func(c *gin.Context, files []map[string]interface{})
 }
 
-// Plugin -
+// Plugin for bulrush
 func (upload *Upload) Plugin() bulrush.PNRet {
 	return func(router *gin.RouterGroup) {
 		router.POST("/upload", func(c *gin.Context) {
@@ -56,6 +57,9 @@ func (upload *Upload) Plugin() bulrush.PNRet {
 				}
 			}
 			c.JSON(http.StatusOK, rets)
+			if upload.Save != nil {
+				upload.Save(c, rets)
+			}
 		})
 	}
 }
