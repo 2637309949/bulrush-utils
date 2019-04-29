@@ -19,7 +19,7 @@ import (
 // Upload -
 type Upload struct {
 	bulrush.PNBase
-	AssetPath string
+	Path      string
 	URLPrefix string
 	Save      func(c *gin.Context, files []map[string]interface{})
 }
@@ -41,7 +41,7 @@ func (upload *Upload) Plugin() bulrush.PNRet {
 					filename := filepath.Base(file.Filename)
 					uuid := bulrush.RandString(32)
 					uuidFileName := bulrush.RandString(32) + string(filename[len(filename)-len(filepath.Ext(filename)):])
-					if err := c.SaveUploadedFile(file, path.Join(upload.AssetPath, uuidFileName)); err != nil {
+					if err := c.SaveUploadedFile(file, path.Join(upload.Path, uuidFileName)); err != nil {
 						c.JSON(http.StatusInternalServerError, gin.H{
 							"message": err.Error(),
 						})
