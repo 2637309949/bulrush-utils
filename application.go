@@ -16,7 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Upload -
+// Upload file plugin
 type Upload struct {
 	bulrush.PNBase
 	Path      string
