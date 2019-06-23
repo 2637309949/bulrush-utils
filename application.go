@@ -16,15 +16,26 @@ import (
 // Upload file plugin
 type Upload struct {
 	bulrush.PNBase
-	Path      string
-	URLPrefix string
-	Save      func(c *gin.Context, files []map[string]interface{})
+	Path            string
+	PublicURLPrefix string
+	URLPrefix       string
+	Save            func(c *gin.Context, files []map[string]interface{})
+}
+
+// New defined return a Upload with default property
+func New() *Upload {
+	up := &Upload{
+		PublicURLPrefix: "/public/upload",
+		URLPrefix:       "/upload",
+		Path:            path.Join("assets/public/upload", ""),
+	}
+	return up
 }
 
 // Plugin for bulrush
 func (upload *Upload) Plugin() bulrush.PNRet {
 	return func(router *gin.RouterGroup) {
-		router.POST("/upload", func(c *gin.Context) {
+		router.POST(upload.URLPrefix, func(c *gin.Context) {
 			form, err := c.MultipartForm()
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
@@ -32,7 +43,7 @@ func (upload *Upload) Plugin() bulrush.PNRet {
 				})
 				c.Abort()
 			}
-			rets := make([]map[string]interface{}, 0)
+			ret := make([]map[string]interface{}, 0)
 			for _, files := range form.File {
 				for _, file := range files {
 					filename := filepath.Base(file.Filename)
@@ -44,18 +55,18 @@ func (upload *Upload) Plugin() bulrush.PNRet {
 						})
 						return
 					}
-					ret := map[string]interface{}{
+					item := map[string]interface{}{
 						"uid":    uuid,
 						"status": "done",
 						"name":   filename,
-						"url":    upload.URLPrefix + "/" + uuidFileName,
+						"url":    upload.PublicURLPrefix + "/" + uuidFileName,
 					}
-					rets = append(rets, ret)
+					ret = append(ret, item)
 				}
 			}
-			c.JSON(http.StatusOK, rets)
+			c.JSON(http.StatusOK, ret)
 			if upload.Save != nil {
-				upload.Save(c, rets)
+				upload.Save(c, ret)
 			}
 		})
 	}
