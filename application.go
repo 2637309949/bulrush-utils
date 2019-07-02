@@ -33,7 +33,7 @@ func New() *Upload {
 }
 
 // Plugin for bulrush
-func (upload *Upload) Plugin() bulrush.PNRet {
+func (upload *Upload) Plugin() interface{} {
 	return func(router *gin.RouterGroup) {
 		router.POST(upload.URLPrefix, func(c *gin.Context) {
 			form, err := c.MultipartForm()
