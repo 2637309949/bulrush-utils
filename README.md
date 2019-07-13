@@ -1,5 +1,69 @@
 ## bulrush-utils
 
+### func
+
+#### Until
+```go
+func(c *gin.Context) {
+    if _, err := utils.Chain(
+        func(ret interface{}) (interface{}, error) {
+            return iden.Auth(c)
+        },
+        func(ret interface{}) (interface{}, error) {
+            return iden.ObtainToken(ret)
+        },
+        func(ret interface{}) (interface{}, error) {
+            token := ret.(*Token)
+            c.SetCookie(tokenKey, token.AccessToken, 60*60*24, "/", "", false, true)
+            c.JSON(http.StatusOK, map[string]interface{}{
+                "AccessToken":  token.AccessToken,
+                "RefreshToken": token.RefreshToken,
+                "ExpiresIn":    token.ExpiresIn,
+                "CreatedAt":    token.CreatedAt,
+                "UpdatedAt":    token.UpdatedAt,
+            })
+            return nil, nil
+        },
+    ); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "message": err.Error(),
+        })
+        return
+    }
+}
+```
+
+#### Chain
+```go
+func(c *gin.Context) {
+    if _, err := utils.Chain(
+        func(ret interface{}) (interface{}, error) {
+            return iden.Auth(c)
+        },
+        func(ret interface{}) (interface{}, error) {
+            return iden.ObtainToken(ret)
+        },
+        func(ret interface{}) (interface{}, error) {
+            token := ret.(*Token)
+            c.SetCookie(tokenKey, token.AccessToken, 60*60*24, "/", "", false, true)
+            c.JSON(http.StatusOK, map[string]interface{}{
+                "AccessToken":  token.AccessToken,
+                "RefreshToken": token.RefreshToken,
+                "ExpiresIn":    token.ExpiresIn,
+                "CreatedAt":    token.CreatedAt,
+                "UpdatedAt":    token.UpdatedAt,
+            })
+            return nil, nil
+        },
+    ); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "message": err.Error(),
+        })
+        return
+    }
+}
+```
+
 ## MIT License
 
 Copyright (c) 2018-2020 Double

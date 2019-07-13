@@ -15,21 +15,3 @@ func Some(src interface{}, init interface{}) interface{} {
 	}
 	return init
 }
-
-// Until defined flow not blank
-func Until(flow ...interface{}) interface{} {
-	for index := 0; index < len(flow); index++ {
-		fw := flow[index]
-		if reflect.TypeOf(fw).Kind() == reflect.Func {
-			ret := reflect.ValueOf(fw).Call([]reflect.Value{})[0]
-			if !ISBlank(ret) {
-				return ret.Interface()
-			}
-		} else {
-			if !ISBlank(reflect.ValueOf(fw)) {
-				return fw
-			}
-		}
-	}
-	return nil
-}
