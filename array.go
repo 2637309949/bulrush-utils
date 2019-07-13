@@ -21,11 +21,11 @@ func Append(src interface{}, arr interface{}) interface{} {
 	srcValue = IndirectValue(srcValue)
 	arrValue = IndirectValue(arrValue)
 
-	if arrValue.Type().Elem() != srcValue.Type() {
+	if srcValue.Type().Kind() != reflect.Func && arrValue.Type().Elem() != srcValue.Type() {
 		panic("First parameter type must be eq Second parameter type")
 	}
 
-	newArr := reflect.New(reflect.SliceOf(srcValue.Type()))
+	newArr := reflect.New(arrValue.Type())
 	if newArr.Elem().CanSet() {
 		newArr.Elem().Set(reflect.Append(arrValue, srcValue))
 	}

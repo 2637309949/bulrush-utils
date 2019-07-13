@@ -7,6 +7,8 @@ import (
 	utils "github.com/2637309949/bulrush-utils"
 )
 
+type AA func(int)
+
 func main() {
 	// 1.array
 	a := 1
@@ -16,4 +18,5 @@ func main() {
 	fmt.Println(arr)
 	arr = utils.Append(&a, reflect.New(reflect.TypeOf([]int{})).Interface())
 	fmt.Println(arr)
+	// 2.
 }
