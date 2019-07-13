@@ -5,31 +5,17 @@
 #### Until
 ```go
 func(c *gin.Context) {
-    if _, err := utils.Chain(
-        func(ret interface{}) (interface{}, error) {
-            return iden.Auth(c)
+    token := utils.Until(
+        c.Query(tokenKey),
+        c.PostForm(tokenKey),
+        c.Request.Header.Get(tokenKey),
+        func() interface{} {
+            value, _ := c.Cookie(tokenKey)
+            return value
         },
-        func(ret interface{}) (interface{}, error) {
-            return iden.ObtainToken(ret)
-        },
-        func(ret interface{}) (interface{}, error) {
-            token := ret.(*Token)
-            c.SetCookie(tokenKey, token.AccessToken, 60*60*24, "/", "", false, true)
-            c.JSON(http.StatusOK, map[string]interface{}{
-                "AccessToken":  token.AccessToken,
-                "RefreshToken": token.RefreshToken,
-                "ExpiresIn":    token.ExpiresIn,
-                "CreatedAt":    token.CreatedAt,
-                "UpdatedAt":    token.UpdatedAt,
-            })
-            return nil, nil
-        },
-    ); err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "message": err.Error(),
-        })
-        return
-    }
+    ).(string)
+    iden.setToken(c, &Token{AccessToken: token})
+    c.Next()
 }
 ```
 
