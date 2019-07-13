@@ -19,10 +19,10 @@
 
 #### Some
 ```go
-	iden.Routes.ObtainTokenRoute = utils.Some(iden.Routes.ObtainTokenRoute, "/obtainToken").(string)
-	iden.Routes.RevokeTokenRoute = utils.Some(iden.Routes.RevokeTokenRoute, "/revokeToken").(string)
-	iden.Routes.RefleshTokenRoute = utils.Some(iden.Routes.RefleshTokenRoute, "/refleshToken").(string)
-	iden.Routes.IdenTokenRoute = utils.Some(iden.Routes.IdenTokenRoute, "/idenToken").(string)
+iden.Routes.ObtainTokenRoute = utils.Some(iden.Routes.ObtainTokenRoute, "/obtainToken").(string)
+iden.Routes.RevokeTokenRoute = utils.Some(iden.Routes.RevokeTokenRoute, "/revokeToken").(string)
+iden.Routes.RefleshTokenRoute = utils.Some(iden.Routes.RefleshTokenRoute, "/refleshToken").(string)
+iden.Routes.IdenTokenRoute = utils.Some(iden.Routes.IdenTokenRoute, "/idenToken").(string)
 ```
 
 ### array
