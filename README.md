@@ -1,5 +1,45 @@
+## Directory
+<!-- TOC -->
+
+- [Directory](#directory)
+- [bulrush-utils](#bulrush-utils)
+    - [common](#common)
+        - [Some](#some)
+    - [array](#array)
+        - [Append](#append)
+    - [func](#func)
+        - [Until](#until)
+        - [Chain](#chain)
+- [MIT License](#mit-license)
+
+<!-- /TOC -->
 ## bulrush-utils
 
+### common
+
+#### Some
+```go
+	iden.Routes.ObtainTokenRoute = utils.Some(iden.Routes.ObtainTokenRoute, "/obtainToken").(string)
+	iden.Routes.RevokeTokenRoute = utils.Some(iden.Routes.RevokeTokenRoute, "/revokeToken").(string)
+	iden.Routes.RefleshTokenRoute = utils.Some(iden.Routes.RefleshTokenRoute, "/refleshToken").(string)
+	iden.Routes.IdenTokenRoute = utils.Some(iden.Routes.IdenTokenRoute, "/idenToken").(string)
+```
+
+### array
+
+#### Append
+```go
+r.POST(routePrefixs.Create(name), utils.Append(func(c *gin.Context) {
+    handler := func(c *gin.Context) {
+        create(name, c, ai.gorm, opts)
+    }
+    h1 := createHooks(ai.gorm, handler)
+    h1.Pre(h.pre)
+    h1.Post(h.post)
+    h1.Auth(h.auth)
+    h1.R(c)
+}, handlers).([]gin.HandlerFunc)...)
+```
 ### func
 
 #### Until
