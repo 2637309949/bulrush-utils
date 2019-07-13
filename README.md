@@ -1,28 +1,4 @@
-## bulrush-upload
-    Provide file upload function
-
-### Example
-
-```go
-func initUpload() *upload.Upload {
-	return upload.New()
-}
-// Upload Plugin init
-var Upload = initUpload()
-app.Use(Upload)
-```
-
-### API
-
-```go
-type Upload struct {
-	bulrush.PNBase
-	Path            string
-	PublicURLPrefix string
-	URLPrefix       string
-	Save            func(c *gin.Context, files []map[string]interface{})
-}
-```
+## bulrush-utils
 
 ## MIT License
 
