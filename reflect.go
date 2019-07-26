@@ -55,3 +55,14 @@ func ISBlank(value reflect.Value) bool {
 	}
 	return reflect.DeepEqual(value.Interface(), reflect.Zero(value.Type()).Interface())
 }
+
+// MakeSlice defined MakeSlice
+func MakeSlice(elemType reflect.Type) interface{} {
+	if elemType.Kind() == reflect.Slice {
+		elemType = elemType.Elem()
+	}
+	sliceType := reflect.SliceOf(elemType)
+	slice := reflect.New(sliceType)
+	slice.Elem().Set(reflect.MakeSlice(sliceType, 0, 0))
+	return slice.Interface()
+}
