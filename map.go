@@ -8,7 +8,7 @@ import "sync"
 
 // SafeMap defined SafeMap
 type SafeMap struct {
-	m map[string]string
+	m map[string]interface{}
 	l *sync.RWMutex
 }
 
@@ -20,13 +20,20 @@ func (s *SafeMap) Set(key string, value string) {
 }
 
 // Get defined Get
-func (s *SafeMap) Get(key string) string {
+func (s *SafeMap) Get(key string) interface{} {
 	s.l.RLock()
 	defer s.l.RUnlock()
 	return s.m[key]
 }
 
+// ALL defined ALL
+func (s *SafeMap) ALL(key string) map[string]interface{} {
+	s.l.RLock()
+	defer s.l.RUnlock()
+	return s.m
+}
+
 // NewSafeMap defined SafeMap
 func NewSafeMap() *SafeMap {
-	return &SafeMap{l: new(sync.RWMutex), m: make(map[string]string)}
+	return &SafeMap{l: new(sync.RWMutex), m: make(map[string]interface{})}
 }
