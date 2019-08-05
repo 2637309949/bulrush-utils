@@ -2,9 +2,13 @@
 // Use of this source code is governed by a MIT style
 // license that can be found in the LICENSE file.
 
-package utils
+package funcs
 
-import "reflect"
+import (
+	"reflect"
+
+	"github.com/2637309949/bulrush-utils/reflects"
+)
 
 // Until defined flow not blank
 func Until(flow ...interface{}) interface{} {
@@ -12,11 +16,11 @@ func Until(flow ...interface{}) interface{} {
 		fw := flow[index]
 		if reflect.TypeOf(fw).Kind() == reflect.Func {
 			ret := reflect.ValueOf(fw).Call([]reflect.Value{})[0]
-			if !ISBlank(ret) {
+			if !reflects.ISBlank(ret) {
 				return ret.Interface()
 			}
 		} else {
-			if !ISBlank(reflect.ValueOf(fw)) {
+			if !reflects.ISBlank(reflect.ValueOf(fw)) {
 				return fw
 			}
 		}

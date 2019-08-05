@@ -2,20 +2,22 @@
 // Use of this source code is governed by a MIT style
 // license that can be found in the LICENSE file.
 
-package utils
+package array
 
 import (
 	"reflect"
+
+	"github.com/2637309949/bulrush-utils/reflects"
 )
 
 // Append defined slice append func
 func Append(src interface{}, arr interface{}) interface{} {
-	if !IsIteratee(arr) {
+	if !reflects.IsIteratee(arr) {
 		panic("Second parameter must be an iteratee")
 	}
 	var (
-		srcValue = IndirectValue(reflect.ValueOf(src))
-		arrValue = IndirectValue(reflect.ValueOf(arr))
+		srcValue = reflects.IndirectValue(reflect.ValueOf(src))
+		arrValue = reflects.IndirectValue(reflect.ValueOf(arr))
 	)
 
 	if srcValue.Type().Kind() != reflect.Func && arrValue.Type().Elem() != srcValue.Type() {
