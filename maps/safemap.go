@@ -13,7 +13,7 @@ type SafeMap struct {
 }
 
 // Set defined Set
-func (s *SafeMap) Set(key string, value string) {
+func (s *SafeMap) Set(key string, value interface{}) {
 	s.l.Lock()
 	defer s.l.Unlock()
 	s.m[key] = value
@@ -27,7 +27,7 @@ func (s *SafeMap) Get(key string) interface{} {
 }
 
 // ALL defined ALL
-func (s *SafeMap) ALL(key string) map[string]interface{} {
+func (s *SafeMap) ALL() map[string]interface{} {
 	s.l.RLock()
 	defer s.l.RUnlock()
 	return s.m
