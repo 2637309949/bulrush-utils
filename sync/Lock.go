@@ -8,12 +8,19 @@ import (
 	"sync"
 
 	"github.com/2637309949/bulrush-utils/maps"
+	"github.com/fanliao/go-promise"
 )
 
-// Lock defined rw for some mu resources
-type Lock struct {
-	locks *maps.SafeMap
-}
+type (
+	// Lock defined rw for some mu resources
+	Lock struct {
+		locks *maps.SafeMap
+	}
+	// Async defined promise.all
+	Async func(gone ...interface{}) (interface{}, error)
+	// Done defined promise done
+	Done func()
+)
 
 // NewLock defined NewLock
 func NewLock() *Lock {
@@ -22,28 +29,18 @@ func NewLock() *Lock {
 	}
 }
 
-// AcquireForSync defined acquire a mu resources
-func (l *Lock) AcquireForSync(name string, funk func()) {
+// Acquire defined acquire a mu resources
+func (l *Lock) Acquire(name string, funk func(async Async)) {
 	defer func() {
 		l.locks.Get(name).(*sync.RWMutex).Unlock()
 	}()
-	lock := l.locks.Get(name)
-	if lock == nil {
-		l.locks.Set(name, new(sync.RWMutex))
-	}
-	l.locks.Get(name).(*sync.RWMutex).Lock()
-	funk()
-}
 
-// AcquireForAsync defined acquire a mu resources
-func (l *Lock) AcquireForAsync(name string, funk func(done func())) {
-	lock := l.locks.Get(name)
-	if lock == nil {
+	if l.locks.Get(name) == nil {
 		l.locks.Set(name, new(sync.RWMutex))
 	}
 	l.locks.Get(name).(*sync.RWMutex).Lock()
-	funk(func() {
-		l.locks.Get(name).(*sync.RWMutex).Unlock()
+	funk(func(gone ...interface{}) (interface{}, error) {
+		return promise.WhenAll(gone...).Get()
 	})
 }
 
