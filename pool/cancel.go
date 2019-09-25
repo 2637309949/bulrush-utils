@@ -6,6 +6,7 @@ package pool
 
 import (
 	"context"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -19,6 +20,7 @@ func RoutingPoolWithCancel(worker func(context.CancelFunc), max int64) (context.
 	timer := time.NewTicker(1 * time.Second)
 	done := make(chan struct{}, 0)
 	init := false
+	var mutex sync.Mutex
 	runWork := func(curr *int64, limit *int64) {
 		if *curr < *limit {
 			func() {
@@ -40,14 +42,18 @@ func RoutingPoolWithCancel(worker func(context.CancelFunc), max int64) (context.
 				done <- struct{}{}
 				break
 			case <-timer.C:
+				mutex.Lock()
 				if !init {
 					init = true
 					for i := int64(0); i < limit; i++ {
 						go runWork(&curr, &limit)
 					}
 				} else {
-					go runWork(&curr, &limit)
+					for i := limit - curr; i > 0; i-- {
+						go runWork(&curr, &limit)
+					}
 				}
+				mutex.Unlock()
 			}
 		}
 	}()
