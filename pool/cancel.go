@@ -12,6 +12,11 @@ import (
 )
 
 // RoutingPoolWithCancel defined routing pool for work
+// Example
+// _, done := RoutingPoolWithCancel(func(cancel context.CancelFunc) {
+// 	time.Sleep(10 * time.Second)
+// }, 10)
+// <-done
 func RoutingPoolWithCancel(worker func(context.CancelFunc), max int64) (context.CancelFunc, chan struct{}) {
 	root := context.Background()
 	ctx, cancel := context.WithCancel(root)
