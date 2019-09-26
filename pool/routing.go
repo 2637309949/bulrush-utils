@@ -9,7 +9,12 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	addition "github.com/2637309949/bulrush-addition"
 )
+
+// rushLogger just for console log
+var rushLogger = addition.RushLogger
 
 // RoutingPoolWithTimer defined routing pool for work
 // Example
@@ -32,17 +37,18 @@ func RoutingPoolWithTimer(worker func(context.CancelFunc), max int64) (context.C
 	init := false
 	var mutex sync.Mutex
 	runWork := func(curr *int64, limit *int64) {
-		if *curr < *limit {
-			func() {
-				defer func() {
-					if *curr > 0 {
-						atomic.AddInt64(curr, -1)
-					}
-				}()
-				atomic.AddInt64(curr, 1)
-				worker(cancel)
-			}()
-		}
+		defer func() {
+			if *curr > 0 {
+				atomic.AddInt64(curr, -1)
+			}
+		}()
+		defer func() {
+			if ret := recover(); ret != nil {
+				rushLogger.Error("%v", ret)
+			}
+		}()
+		atomic.AddInt64(curr, 1)
+		worker(cancel)
 	}
 	go func() {
 		for {
@@ -59,8 +65,10 @@ func RoutingPoolWithTimer(worker func(context.CancelFunc), max int64) (context.C
 				break
 			case <-timer.C:
 				mutex.Lock()
-				for i := limit - curr; i > 0; i-- {
-					go runWork(&curr, &limit)
+				if curr < limit {
+					for i := limit - curr; i > 0; i-- {
+						go runWork(&curr, &limit)
+					}
 				}
 				mutex.Unlock()
 			}
@@ -88,14 +96,17 @@ func RoutingPoolWithAutomatic(worker func(context.CancelFunc), max int64) (conte
 	init := false
 	var runWork func(limit *int64)
 	runWork = func(limit *int64) {
-		func() {
-			defer func() {
-				if *limit > 0 {
-					go runWork(limit)
-				}
-			}()
-			worker(cancel)
+		defer func() {
+			if *limit > 0 {
+				go runWork(limit)
+			}
 		}()
+		defer func() {
+			if ret := recover(); ret != nil {
+				rushLogger.Error("%v", ret)
+			}
+		}()
+		worker(cancel)
 	}
 	go func() {
 		for {
