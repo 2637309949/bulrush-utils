@@ -13,8 +13,13 @@ import (
 
 // RoutingPoolWithTimer defined routing pool for work
 // Example
-// _, done := RoutingPoolWithTimer(func(cancel context.CancelFunc) {
+// i := 0
+// _, done := pool.RoutingPoolWithTimer(func(cancel context.CancelFunc) {
 // 	time.Sleep(10 * time.Second)
+// 	i++
+// 	if i == 30 {
+// 		cancel()
+// 	}
 // }, 10)
 // <-done
 func RoutingPoolWithTimer(worker func(context.CancelFunc), max int64) (context.CancelFunc, chan struct{}) {
