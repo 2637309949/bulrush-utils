@@ -6,8 +6,6 @@ package pool
 
 import (
 	"context"
-	"sync"
-	"sync/atomic"
 	"time"
 
 	addition "github.com/2637309949/bulrush-addition"
@@ -27,50 +25,41 @@ var rushLogger = addition.RushLogger
 // 	}
 // }, 10)
 // <-done
-func RoutingPoolWithTimer(worker func(context.CancelFunc), max int64) (context.CancelFunc, chan struct{}) {
+func RoutingPoolWithTimer(worker func(context.CancelFunc), max int) (context.CancelFunc, chan struct{}) {
 	root := context.Background()
 	ctx, cancel := context.WithCancel(root)
-	limit := max
-	curr := int64(0)
 	timer := time.NewTicker(1 * time.Second)
 	done := make(chan struct{}, 0)
 	init := false
-	var mutex sync.Mutex
-	runWork := func(curr *int64, limit *int64) {
+	limiter := make(chan int, max)
+
+	runWork := func(c chan int) {
 		defer func() {
-			if *curr > 0 {
-				atomic.AddInt64(curr, -1)
-			}
+			<-c
 		}()
 		defer func() {
 			if ret := recover(); ret != nil {
 				rushLogger.Error("%v", ret)
 			}
 		}()
-		atomic.AddInt64(curr, 1)
+		c <- 1
 		worker(cancel)
 	}
+
 	go func() {
-		for {
-			if !init {
-				init = true
-				for i := int64(0); i < limit; i++ {
-					go runWork(&curr, &limit)
-				}
+		if !init {
+			init = true
+			for i := 0; i < max; i++ {
+				go runWork(limiter)
 			}
+		}
+		for {
 			select {
 			case <-ctx.Done():
-				limit = 0
 				done <- struct{}{}
 				break
 			case <-timer.C:
-				mutex.Lock()
-				if curr < limit {
-					for i := limit - curr; i > 0; i-- {
-						go runWork(&curr, &limit)
-					}
-				}
-				mutex.Unlock()
+				go runWork(limiter)
 			}
 		}
 	}()
@@ -88,17 +77,20 @@ func RoutingPoolWithTimer(worker func(context.CancelFunc), max int64) (context.C
 // 	}
 // }, 10)
 // <-done
-func RoutingPoolWithAutomatic(worker func(context.CancelFunc), max int64) (context.CancelFunc, chan struct{}) {
+func RoutingPoolWithAutomatic(worker func(context.CancelFunc), max int) (context.CancelFunc, chan struct{}) {
 	root := context.Background()
 	ctx, cancel := context.WithCancel(root)
-	limit := max
 	done := make(chan struct{}, 0)
 	init := false
-	var runWork func(limit *int64)
-	runWork = func(limit *int64) {
+	limiter := make(chan int, max)
+	var runWork func(c chan int)
+	runWork = func(c chan int) {
 		defer func() {
-			if *limit > 0 {
-				go runWork(limit)
+			<-c
+			select {
+			case <-done:
+			default:
+				go runWork(c)
 			}
 		}()
 		defer func() {
@@ -106,23 +98,22 @@ func RoutingPoolWithAutomatic(worker func(context.CancelFunc), max int64) (conte
 				rushLogger.Error("%v", ret)
 			}
 		}()
+		c <- 1
 		worker(cancel)
 	}
+
 	go func() {
-		for {
-			if !init {
-				init = true
-				for i := int64(0); i < limit; i++ {
-					go runWork(&limit)
-				}
+		if !init {
+			init = true
+			for i := 0; i < max; i++ {
+				go runWork(limiter)
 			}
-			select {
-			case <-ctx.Done():
-				limit = 0
-				done <- struct{}{}
-				break
-			default:
-			}
+		}
+		select {
+		case <-ctx.Done():
+			done <- struct{}{}
+			close(done)
+			break
 		}
 	}()
 	return cancel, done
